@@ -88,12 +88,12 @@
       </div>
       <div id="imgs" class="pjax">
         <ul>
-          <li class="item" data-background-image="https://tva4.sinaimg.cn/large/6833939bly1gicit31ffoj20zk0m8naf.jpg"></li>
-          <li class="item" data-background-image="https://tva4.sinaimg.cn/large/6833939bly1giclflwv2aj20zk0m84qp.jpg"></li>
-          <li class="item" data-background-image="https://tva4.sinaimg.cn/large/6833939bly1gipeyhsblkj20zk0m81kx.jpg"></li>
-          <li class="item" data-background-image="https://tva4.sinaimg.cn/large/6833939bly1giclfb3vzhj20zk0m8wny.jpg"></li>
-          <li class="item" data-background-image="https://tva4.sinaimg.cn/large/6833939bly1gipev1x5e4j20zk0m8b29.jpg"></li>
-          <li class="item" data-background-image="https://tva4.sinaimg.cn/large/6833939bly1giclh5u05ej20zk0m87df.jpg"></li>
+          <li class="item" data-background-image="https://tva3.sinaimg.cn/large/6833939bly1gipet8c1a2j20zk0m8kct.jpg"></li>
+          <li class="item" data-background-image="https://tva3.sinaimg.cn/large/6833939bly1giph47e9vtj20zk0m8x6l.jpg"></li>
+          <li class="item" data-background-image="https://tva3.sinaimg.cn/large/6833939bly1giciub8ja1j20zk0m81ky.jpg"></li>
+          <li class="item" data-background-image="https://tva3.sinaimg.cn/large/6833939bly1gicit31ffoj20zk0m8naf.jpg"></li>
+          <li class="item" data-background-image="https://tva3.sinaimg.cn/large/6833939bly1gipesng5oej20zk0m87d4.jpg"></li>
+          <li class="item" data-background-image="https://tva3.sinaimg.cn/large/6833939bly1giclfw2t96j20zk0m8x6p.jpg"></li>
         </ul>
       </div>
     </header>
@@ -120,7 +120,7 @@
         
 <article class="item">
   <div class="cover">
-    <a href="/2025/07/16/%E8%A7%A3%E6%9E%90tiff/" itemprop="url" title="解析tiff"><img data-src="https://tva4.sinaimg.cn/mw690/6833939bly1gipeun65urj20zk0m81ii.jpg"></a>
+    <a href="/2025/07/16/%E8%A7%A3%E6%9E%90tiff/" itemprop="url" title="解析tiff"><img data-src="https://tva3.sinaimg.cn/mw690/6833939bly1giclhtuo6nj20zk0m8ttm.jpg"></a>
   </div>
   <div class="info">
     
@@ -135,12 +135,7 @@
 
     <h3><a href="/2025/07/16/%E8%A7%A3%E6%9E%90tiff/" itemprop="url" title="解析tiff">解析tiff</a></h3>
     <div class="excerpt">
-        <ol>
-<li>地图：mapboxgl；</li>
-<li>需求：用户上传 tiff 文件，解析渲染到地图中；</li>
-<li>工具：geotiff, proj4, canvas；</li>
-<li>环境：nodejs</li>
-</ol>
+        <p>这是一个基于 Node.js 的 GIS 解决方案示例：用户可上传 GeoTIFF（.tif&#x2F;.tiff）文件，脚本会利用 geotiff 解析影像数据、通过 proj4 完成投影与经纬度边界计算，最后借助 Canvas 将栅格渲染成 png&#x2F;jpeg&#x2F;pdf 图像并可直接加载到 MapboxGL 地图中。</p>
       
     </div>
     <a href="/2025/07/16/%E8%A7%A3%E6%9E%90tiff/" itemprop="url" title="解析tiff" class="btn">more...</a>
@@ -150,7 +145,7 @@
         
 <article class="item">
   <div class="cover">
-    <a href="/2025/07/09/%E7%94%A8ts%E6%9E%84%E5%BB%BA%E9%95%BF%E5%B1%9E%E6%80%A7%E5%88%97%E8%A1%A8/" itemprop="url" title="用ts构建长属性列表"><img data-src="https://tva4.sinaimg.cn/mw690/6833939bly1gicitht3xtj20zk0m8k5v.jpg"></a>
+    <a href="/2025/07/09/%E7%94%A8ts%E6%9E%84%E5%BB%BA%E9%95%BF%E5%B1%9E%E6%80%A7%E5%88%97%E8%A1%A8/" itemprop="url" title="用ts构建长属性列表"><img data-src="https://tva3.sinaimg.cn/mw690/6833939bly1gipesng5oej20zk0m87d4.jpg"></a>
   </div>
   <div class="info">
     
@@ -165,8 +160,7 @@
 
     <h3><a href="/2025/07/09/%E7%94%A8ts%E6%9E%84%E5%BB%BA%E9%95%BF%E5%B1%9E%E6%80%A7%E5%88%97%E8%A1%A8/" itemprop="url" title="用ts构建长属性列表">用ts构建长属性列表</a></h3>
     <div class="excerpt">
-        <h1 id="背景"><a class="markdownIt-Anchor" href="#背景">#</a> 背景</h1>
-<p>在项目中，如果遇到一些 key 有规律和很多字段的对象，并且需要在拿对象某个字段值的时候都有类型提示</p>
+        <p>本文演示了如何利用 TypeScript 的递归条件类型，针对一组有规律的键（如 ad_0、ad_1 … ad_30）自动生成字符串字面量联合类型，并基于该联合类型构造一个拥有完整类型提示的对象类型（SensorInfo）。这种方案让你在访问对象任意字段时，都能享受 IDE 的智能补全和类型检查，极大提升了开发效率和安全性。</p>
       
     </div>
     <a href="/2025/07/09/%E7%94%A8ts%E6%9E%84%E5%BB%BA%E9%95%BF%E5%B1%9E%E6%80%A7%E5%88%97%E8%A1%A8/" itemprop="url" title="用ts构建长属性列表" class="btn">more...</a>
@@ -176,7 +170,7 @@
         
 <article class="item">
   <div class="cover">
-    <a href="/2025/07/09/hello-world/" itemprop="url" title="Hello World"><img data-src="https://tva4.sinaimg.cn/mw690/6833939bly1gipexbei4hj20zk0m8npd.jpg"></a>
+    <a href="/2025/07/09/hello-world/" itemprop="url" title="Hello World"><img data-src="https://tva3.sinaimg.cn/mw690/6833939bly1giciuv0socj20zk0m8qes.jpg"></a>
   </div>
   <div class="info">
     
@@ -294,6 +288,15 @@ More info: Writing
 <div class="breadcrumb">
 </div>
 
+    <span><a href="/2025/07/16/%E8%A7%A3%E6%9E%90tiff/" title="解析tiff">解析tiff</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+</div>
+
     <span><a href="/2025/07/09/hello-world/" title="Hello World">Hello World</a></span>
   </li>
 
@@ -304,15 +307,6 @@ More info: Writing
 </div>
 
     <span><a href="/2025/07/09/%E7%94%A8ts%E6%9E%84%E5%BB%BA%E9%95%BF%E5%B1%9E%E6%80%A7%E5%88%97%E8%A1%A8/" title="用ts构建长属性列表">用ts构建长属性列表</a></span>
-  </li>
-
-      
-  <li class="item">
-    
-<div class="breadcrumb">
-</div>
-
-    <span><a href="/2025/07/16/%E8%A7%A3%E6%9E%90tiff/" title="解析tiff">解析tiff</a></span>
   </li>
 
   </ul>

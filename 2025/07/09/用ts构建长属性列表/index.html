@@ -102,12 +102,12 @@ Cherno = 听风阁</title>
       </div>
       <div id="imgs" class="pjax">
         <ul>
-          <li class="item" data-background-image="https://tva4.sinaimg.cn/large/6833939bly1giciszlczyj20zk0m816d.jpg"></li>
-          <li class="item" data-background-image="https://tva4.sinaimg.cn/large/6833939bly1giclj61ylzj20zk0m8b29.jpg"></li>
-          <li class="item" data-background-image="https://tva4.sinaimg.cn/large/6833939bly1gipesng5oej20zk0m87d4.jpg"></li>
-          <li class="item" data-background-image="https://tva4.sinaimg.cn/large/6833939bly1gipev1x5e4j20zk0m8b29.jpg"></li>
-          <li class="item" data-background-image="https://tva4.sinaimg.cn/large/6833939bly1gipetlbztpj20zk0m84qp.jpg"></li>
-          <li class="item" data-background-image="https://tva4.sinaimg.cn/large/6833939bly1gipeuibk9fj20zk0m8ay2.jpg"></li>
+          <li class="item" data-background-image="https://tva3.sinaimg.cn/large/6833939bly1giclfw2t96j20zk0m8x6p.jpg"></li>
+          <li class="item" data-background-image="https://tva3.sinaimg.cn/large/6833939bly1giclhpw3lwj20zk0m8gvw.jpg"></li>
+          <li class="item" data-background-image="https://tva3.sinaimg.cn/large/6833939bly1gipetlbztpj20zk0m84qp.jpg"></li>
+          <li class="item" data-background-image="https://tva3.sinaimg.cn/large/6833939bly1gipeu1usa7j20zk0m8b29.jpg"></li>
+          <li class="item" data-background-image="https://tva3.sinaimg.cn/large/6833939bly1gipeuibk9fj20zk0m8ay2.jpg"></li>
+          <li class="item" data-background-image="https://tva3.sinaimg.cn/large/6833939bly1giclhtuo6nj20zk0m8ttm.jpg"></li>
         </ul>
       </div>
     </header>
@@ -151,11 +151,10 @@ Cherno = 听风阁</title>
   <div class="body md" itemprop="articleBody">
     
 
-    <h1 id="背景"><a class="markdownIt-Anchor" href="#背景">#</a> 背景</h1>
-<p>在项目中，如果遇到一些 key 有规律和很多字段的对象，并且需要在拿对象某个字段值的时候都有类型提示</p>
+    <p>本文演示了如何利用 TypeScript 的递归条件类型，针对一组有规律的键（如 ad_0、ad_1 … ad_30）自动生成字符串字面量联合类型，并基于该联合类型构造一个拥有完整类型提示的对象类型（SensorInfo）。这种方案让你在访问对象任意字段时，都能享受 IDE 的智能补全和类型检查，极大提升了开发效率和安全性。</p>
 <span id="more"></span>
-<h1 id="解决方案"><a class="markdownIt-Anchor" href="#解决方案">#</a> 解决方案</h1>
-<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">Fields</span>&lt;<span class="title class_">Count</span> = <span class="number">0</span>, <span class="title class_">Props</span> <span class="keyword">extends</span> <span class="built_in">string</span>[] = []&gt; = <span class="title class_">Props</span>[<span class="string">&#x27;length&#x27;</span>] <span class="keyword">extends</span> <span class="title class_">Count</span> ? <span class="title class_">Props</span>[<span class="built_in">number</span>]: <span class="title class_">Fields</span>&lt;<span class="title class_">Count</span>, [...<span class="title class_">Props</span>, <span class="string">`ad_<span class="subst">$&#123;Props[<span class="string">&#x27;length&#x27;</span>]&#125;</span>`</span>]&gt;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">SensorInfo</span>  =&#123;</span><br><span class="line">  [K <span class="keyword">in</span> <span class="title class_">Fields</span>&lt;<span class="number">31</span>&gt;]: <span class="built_in">number</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h1><figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="title class_">Fields</span>&lt;<span class="title class_">Count</span> = <span class="number">0</span>, <span class="title class_">Props</span> <span class="keyword">extends</span> <span class="built_in">string</span>[] = []&gt; = <span class="title class_">Props</span>[<span class="string">&#x27;length&#x27;</span>] <span class="keyword">extends</span> <span class="title class_">Count</span> ? <span class="title class_">Props</span>[<span class="built_in">number</span>]: <span class="title class_">Fields</span>&lt;<span class="title class_">Count</span>, [...<span class="title class_">Props</span>, <span class="string">`ad_<span class="subst">$&#123;Props[<span class="string">&#x27;length&#x27;</span>]&#125;</span>`</span>]&gt;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="title class_">SensorInfo</span>  =&#123;</span><br><span class="line">  [K <span class="keyword">in</span> <span class="title class_">Fields</span>&lt;<span class="number">31</span>&gt;]: <span class="built_in">number</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
       <div class="tags">
           <a href="/tags/typescript/" rel="tag"><i class="ic i-tag"></i> typescript</a>
@@ -171,7 +170,7 @@ Cherno = 听风阁</title>
       <i class="ic i-calendar-check"></i>
     </span>
     <span class="text">更新于</span>
-    <time title="修改时间：2025-07-16 15:03:11" itemprop="dateModified" datetime="2025-07-16T15:03:11+08:00">2025-07-16</time>
+    <time title="修改时间：2025-07-16 15:12:48" itemprop="dateModified" datetime="2025-07-16T15:12:48+08:00">2025-07-16</time>
   </span>
 </div>
 
@@ -226,7 +225,7 @@ Cherno = 听风阁</title>
     <div class="item left">
       
 
-  <a href="/2025/07/09/hello-world/" itemprop="url" rel="prev" data-background-image="https:&#x2F;&#x2F;tva4.sinaimg.cn&#x2F;mw690&#x2F;6833939bly1gipeyonbf9j20zk0m8e81.jpg" title="Hello World">
+  <a href="/2025/07/09/hello-world/" itemprop="url" rel="prev" data-background-image="https:&#x2F;&#x2F;tva3.sinaimg.cn&#x2F;mw690&#x2F;6833939bly1giclh3brzpj20zk0m8ann.jpg" title="Hello World">
   <span class="type">上一篇</span>
   <span class="category"><i class="ic i-flag"></i> </span>
   <h3>Hello World</h3>
@@ -236,7 +235,7 @@ Cherno = 听风阁</title>
     <div class="item right">
       
 
-  <a href="/2025/07/16/%E8%A7%A3%E6%9E%90tiff/" itemprop="url" rel="next" data-background-image="https:&#x2F;&#x2F;tva4.sinaimg.cn&#x2F;mw690&#x2F;6833939bly1gipeybxm1pj20zk0m8niv.jpg" title="解析tiff">
+  <a href="/2025/07/16/%E8%A7%A3%E6%9E%90tiff/" itemprop="url" rel="next" data-background-image="https:&#x2F;&#x2F;tva3.sinaimg.cn&#x2F;mw690&#x2F;6833939bly1gicm07ih54j20zk0m84qp.jpg" title="解析tiff">
   <span class="type">下一篇</span>
   <span class="category"><i class="ic i-flag"></i> </span>
   <h3>解析tiff</h3>
@@ -258,7 +257,7 @@ Cherno = 听风阁</title>
   <div class="panels">
     <div class="inner">
       <div class="contents panel pjax" data-title="文章目录">
-          <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%83%8C%E6%99%AF"><span class="toc-number">1.</span> <span class="toc-text"> 背景</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">2.</span> <span class="toc-text"> 解决方案</span></a></li></ol>
+          <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88"><span class="toc-number">1.</span> <span class="toc-text">解决方案</span></a></li></ol>
       </div>
       <div class="related panel pjax" data-title="系列文章">
       </div>
@@ -338,15 +337,6 @@ Cherno = 听风阁</title>
 <div class="breadcrumb">
 </div>
 
-    <span><a href="/2025/07/09/%E7%94%A8ts%E6%9E%84%E5%BB%BA%E9%95%BF%E5%B1%9E%E6%80%A7%E5%88%97%E8%A1%A8/" title="用ts构建长属性列表">用ts构建长属性列表</a></span>
-  </li>
-
-      
-  <li class="item">
-    
-<div class="breadcrumb">
-</div>
-
     <span><a href="/2025/07/16/%E8%A7%A3%E6%9E%90tiff/" title="解析tiff">解析tiff</a></span>
   </li>
 
@@ -357,6 +347,15 @@ Cherno = 听风阁</title>
 </div>
 
     <span><a href="/2025/07/09/hello-world/" title="Hello World">Hello World</a></span>
+  </li>
+
+      
+  <li class="item">
+    
+<div class="breadcrumb">
+</div>
+
+    <span><a href="/2025/07/09/%E7%94%A8ts%E6%9E%84%E5%BB%BA%E9%95%BF%E5%B1%9E%E6%80%A7%E5%88%97%E8%A1%A8/" title="用ts构建长属性列表">用ts构建长属性列表</a></span>
   </li>
 
   </ul>
