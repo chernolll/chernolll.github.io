@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"chernolll.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":3,"unescape":true,"preload":true},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.json"};
+  </script>
+
+  <meta name="description" content="这篇文章详细解析了 Canvas 文字雨效果的实现原理，包括半透明幕布叠加、字符位置控制以及流光尾迹的实现思路，并附上完整源码与优化建议。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="文字雨效果原理解析与实现">
+<meta property="og:url" content="https://chernolll.github.io/2025/08/11/canvas-%E6%96%87%E5%AD%97%E9%9B%A8/index.html">
+<meta property="og:site_name" content="听风阁">
+<meta property="og:description" content="这篇文章详细解析了 Canvas 文字雨效果的实现原理，包括半透明幕布叠加、字符位置控制以及流光尾迹的实现思路，并附上完整源码与优化建议。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/chernolll/image_figure/2025-08-1123.56.45-ezgif.com-optimize.gif">
+<meta property="article:published_time" content="2025-08-11T13:30:00.000Z">
+<meta property="article:modified_time" content="2025-08-11T16:05:53.393Z">
+<meta property="article:author" content="Cherno">
+<meta property="article:tag" content="canvas">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cdn.jsdelivr.net/gh/chernolll/image_figure/2025-08-1123.56.45-ezgif.com-optimize.gif">
+
+<link rel="canonical" href="https://chernolll.github.io/2025/08/11/canvas-%E6%96%87%E5%AD%97%E9%9B%A8/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>文字雨效果原理解析与实现 | 听风阁</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">听风阁</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://chernolll.github.io/2025/08/11/canvas-%E6%96%87%E5%AD%97%E9%9B%A8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Cherno">
+      <meta itemprop="description" content="记录成长">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="听风阁">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          文字雨效果原理解析与实现
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2025-08-11 21:30:00" itemprop="dateCreated datePublished" datetime="2025-08-11T21:30:00+08:00">2025-08-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2025-08-12 00:05:53" itemprop="dateModified" datetime="2025-08-12T00:05:53+08:00">2025-08-12</time>
+              </span>
+
+          
+            <div class="post-description">这篇文章详细解析了 Canvas 文字雨效果的实现原理，包括半透明幕布叠加、字符位置控制以及流光尾迹的实现思路，并附上完整源码与优化建议。</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>“雨点般的字符落下，像《黑客帝国》里的数字世界在流动。”<br>本文将带你从 0 到 1 实现一个 Canvas 文字雨效果，并深入解析它的动画原理。</p>
+</blockquote>
+<h2 id="效果预览"><a href="#效果预览" class="headerlink" title="效果预览"></a>效果预览</h2><p><img src="https://cdn.jsdelivr.net/gh/chernolll/image_figure/2025-08-1123.56.45-ezgif.com-optimize.gif" alt="效果图"></p>
+<h2 id="核心代码"><a href="#核心代码" class="headerlink" title="核心代码"></a>核心代码</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** <span class="doctag">@type</span> &#123;<span class="type">HTMLCanvasElement</span>&#125; */</span></span><br><span class="line"><span class="keyword">const</span> canvas = <span class="variable language_">document</span>.<span class="title function_">querySelector</span>(<span class="string">&quot;#canvas&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> ctx = canvas.<span class="title function_">getContext</span>(<span class="string">&quot;2d&quot;</span>);</span><br><span class="line"><span class="keyword">const</span> ratio = <span class="variable language_">window</span>.<span class="property">devicePixelRatio</span>;</span><br><span class="line"><span class="keyword">const</span> w = <span class="variable language_">window</span>.<span class="property">innerWidth</span> * ratio;</span><br><span class="line"><span class="keyword">const</span> h = <span class="variable language_">window</span>.<span class="property">innerHeight</span> * ratio;</span><br><span class="line"></span><br><span class="line">canvas.<span class="property">width</span> = w;</span><br><span class="line">canvas.<span class="property">height</span> = h;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> fontSize = <span class="number">10</span> * ratio;</span><br><span class="line">ctx.<span class="property">font</span> = <span class="string">`<span class="subst">$&#123;fontSize&#125;</span>px &quot;Roboto Mono&quot;`</span>;</span><br><span class="line"><span class="keyword">const</span> columnCount = <span class="title class_">Math</span>.<span class="title function_">floor</span>(w / fontSize);</span><br><span class="line"><span class="keyword">const</span> charIndex = <span class="keyword">new</span> <span class="title class_">Array</span>(columnCount).<span class="title function_">fill</span>(<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">getRandomChar</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="keyword">const</span> str = <span class="string">&quot;0123456789abcdefghijklmnopqrltuvwxyz&quot;</span>;</span><br><span class="line">  <span class="keyword">return</span> str[<span class="title class_">Math</span>.<span class="title function_">floor</span>(<span class="title class_">Math</span>.<span class="title function_">random</span>() * str.<span class="property">length</span>)];</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">draw</span>(<span class="params"></span>) &#123;</span><br><span class="line">  <span class="comment">// 1. 半透明幕布，让旧文字逐渐变暗</span></span><br><span class="line">  ctx.<span class="property">fillStyle</span> = <span class="string">&quot;rgba(0, 0, 0, 0.1)&quot;</span>;</span><br><span class="line">  ctx.<span class="title function_">fillRect</span>(<span class="number">0</span>, <span class="number">0</span>, w, h);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// 2. 画新文字</span></span><br><span class="line">  ctx.<span class="property">fillStyle</span> = <span class="string">&quot;#6be445&quot;</span>;</span><br><span class="line">  ctx.<span class="property">textBaseline</span> = <span class="string">&quot;top&quot;</span>;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; columnCount; i++) &#123;</span><br><span class="line">    <span class="keyword">const</span> text = <span class="title function_">getRandomChar</span>();</span><br><span class="line">    <span class="keyword">const</span> x = i * fontSize;</span><br><span class="line">    <span class="keyword">const</span> y = charIndex[i] * fontSize;</span><br><span class="line">    ctx.<span class="title function_">fillText</span>(text, x, y);</span><br><span class="line">    <span class="keyword">if</span> (y &gt; h &amp;&amp; <span class="title class_">Math</span>.<span class="title function_">random</span>() &gt; <span class="number">0.99</span>) &#123;</span><br><span class="line">      charIndex[i] = <span class="number">0</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      charIndex[i]++;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// 此处改为用setTimeout延迟执行，这样效果看起来好一点</span></span><br><span class="line">  <span class="variable language_">window</span>.<span class="built_in">setTimeout</span>(draw, <span class="number">50</span>);</span><br><span class="line">  <span class="comment">// requestAnimationFrame(draw);</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="title function_">draw</span>();</span><br></pre></td></tr></table></figure>
+
+<h2 id="原理解析"><a href="#原理解析" class="headerlink" title="原理解析"></a>原理解析</h2><p>文字雨的动画主要依赖两个关键技巧：</p>
+<h3 id="1-半透明幕布叠加"><a href="#1-半透明幕布叠加" class="headerlink" title="1. 半透明幕布叠加"></a>1. 半透明幕布叠加</h3><p>每一帧先用 <code>rgba(0,0,0,0.1)</code> 这样的<strong>半透明颜色</strong>填充整个画布：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ctx.<span class="property">fillStyle</span> = <span class="string">&quot;rgba(0, 0, 0, 0.1)&quot;</span>;</span><br><span class="line">ctx.<span class="title function_">fillRect</span>(<span class="number">0</span>, <span class="number">0</span>, w, h);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>作用</strong>：不是一次性清空画布，而是让之前的内容逐渐变暗</li>
+<li><strong>效果</strong>：形成“尾迹”，看起来像字符带着残影下落</li>
+<li><strong>如果透明度&#x3D;1</strong>：旧内容会一次性消失，没有流动感</li>
+</ul>
+<h3 id="2-列位置与字符落下"><a href="#2-列位置与字符落下" class="headerlink" title="2. 列位置与字符落下"></a>2. 列位置与字符落下</h3><ul>
+<li>按列计算 <code>columnCount</code>，每列独立控制一个字符的纵向位置</li>
+<li>每一帧在该列的<strong>下一行</strong>绘制一个新字符</li>
+<li>当字符到底部后，以一定概率重新从顶部开始落下</li>
+</ul>
+<h3 id="3-颜色与字体"><a href="#3-颜色与字体" class="headerlink" title="3. 颜色与字体"></a>3. 颜色与字体</h3><ul>
+<li>绿色字符：<code>ctx.fillStyle = &quot;#6be445&quot;</code></li>
+<li>单一字体：保证列宽和字符对齐</li>
+<li>可以改成任意字符集（比如日文假名、emoji）</li>
+</ul>
+<h2 id="优化建议"><a href="#优化建议" class="headerlink" title="优化建议"></a>优化建议</h2><ul>
+<li>在高 DPI 屏幕上使用 <code>window.devicePixelRatio</code>，防止模糊</li>
+<li>控制 <code>requestAnimationFrame</code> 的绘制频率，降低 CPU 占用</li>
+<li>使用更高透明度（如 <code>0.05</code>）获得更长的尾迹效果</li>
+</ul>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>文字雨的酷炫效果并不复杂，关键是<strong>半透明幕布 + 按列落下的字符逻辑</strong>。<br>理解了这个原理，你还可以用它做星空、烟雾、粒子尾迹等各种特效。</p>
+<hr>
+<p>🎬 <strong>拓展阅读</strong>：</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/API/CanvasRenderingContext2D">MDN CanvasRenderingContext2D 文档</a></li>
+<li><a target="_blank" rel="noopener" href="https://developer.mozilla.org/zh-CN/docs/Web/API/window/requestAnimationFrame">requestAnimationFrame</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/canvas/" rel="tag"># canvas</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2025/07/31/mapbox%E7%AF%87-%E5%8A%A8%E6%80%81%E9%97%AA%E7%83%81%E7%82%B9%E4%B8%8E%E8%81%9A%E7%B1%BB%E5%8A%A8%E7%94%BB%E6%95%88%E6%9E%9C/" rel="prev" title="mapbox篇-动态闪烁点与聚类动画效果">
+      <i class="fa fa-chevron-left"></i> mapbox篇-动态闪烁点与聚类动画效果
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%95%88%E6%9E%9C%E9%A2%84%E8%A7%88"><span class="nav-number">1.</span> <span class="nav-text">效果预览</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%B8%E5%BF%83%E4%BB%A3%E7%A0%81"><span class="nav-number">2.</span> <span class="nav-text">核心代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8E%9F%E7%90%86%E8%A7%A3%E6%9E%90"><span class="nav-number">3.</span> <span class="nav-text">原理解析</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E5%8D%8A%E9%80%8F%E6%98%8E%E5%B9%95%E5%B8%83%E5%8F%A0%E5%8A%A0"><span class="nav-number">3.1.</span> <span class="nav-text">1. 半透明幕布叠加</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%88%97%E4%BD%8D%E7%BD%AE%E4%B8%8E%E5%AD%97%E7%AC%A6%E8%90%BD%E4%B8%8B"><span class="nav-number">3.2.</span> <span class="nav-text">2. 列位置与字符落下</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E9%A2%9C%E8%89%B2%E4%B8%8E%E5%AD%97%E4%BD%93"><span class="nav-number">3.3.</span> <span class="nav-text">3. 颜色与字体</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E5%BB%BA%E8%AE%AE"><span class="nav-number">4.</span> <span class="nav-text">优化建议</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Cherno</p>
+  <div class="site-description" itemprop="description">记录成长</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2025</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Cherno</span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+if (document.querySelectorAll('pre.mermaid').length) {
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/mermaid@8/dist/mermaid.min.js', () => {
+    mermaid.initialize({
+      theme    : 'forest',
+      logLevel : 3,
+      flowchart: { curve     : 'linear' },
+      gantt    : { axisFormat: '%m/%d/%Y' },
+      sequence : { actorMargin: 50 }
+    });
+  }, window.mermaid);
+}
+</script>
+
+
+  
+
+  
+
+</body>
+</html>
